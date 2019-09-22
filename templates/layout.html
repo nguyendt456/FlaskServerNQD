@@ -1,0 +1,41 @@
+<html>
+<style>
+    .button {
+		border : none;
+		transition-duration : 1s;
+		float: left;
+		padding : 15px;
+		width : 25%;
+		background-color : rgb(93, 165, 121 );
+		font-size : 25px;
+		text-align : center;	
+	}
+	.button:hover {
+		background-color:#5c8a8a;
+	}
+</style>
+
+<meta charset = "UTF-8"> 
+<meta name="viewport" content="width=device-width, initial-scale=0.65">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/javascript-obfuscator/dist/index.browser.js"></script>
+<title> Trang chủ </title>
+<div style="width:90%;border:solid 3px;margin-left: auto;margin-right: auto;border-color:rgb(93, 165, 121);">
+    <div style="width:100%;margin-left: auto;margin-right: auto;">
+        <a href="index" class="button" style = "color:white;text-decoration:none;"> Trang chủ </a>
+        <a href="list" class="button" style = "color:white;text-decoration:none;"> Đống ủ &nbsp; </a>
+        <a href="user" class="button" style = "color:white;text-decoration:none;"> Người dùng </a>
+        <a href="logout" class="button" style = "color:white;text-decoration:none;"> Đăng xuất </a>
+    </div>
+    <br><br><br><br>
+    <div style="font-family: 'Noto Serif'; sans-serif;font-size : 40px; text-align: center"> 
+        Trường THPT Chuyên Nguyễn Quang Diêu
+    </div>
+    <br>
+    {% block content %}{% endblock %}
+</div>
+</html>

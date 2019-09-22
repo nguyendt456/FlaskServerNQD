@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+{% block content %}
+    <style>
+        .rec {
+            width : 90%;
+            height : auto;
+            border-radius: 15px;
+            border : solid 2px;
+            border-color: rgb(103, 175, 131);
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .square {
+            border-radius: 20px;
+            height: 150px;
+            width: 150px;
+        }
+        .btn{
+            font-size: 23px;
+        }
+    </style>
+    <div style= "margin-left:auto;margin-right: auto;width:100%;text-align:center;"><a href="createnew" class="btn btn-outline-primary but"> Tạo đống ủ mới </a></div>
+    <br>
+    {% for i in range(0,devices.count()) %}
+    <div class = "rec" id="{{devices[i].uuid}}">
+        <label style= "font-size: 25px;margin-left:25px">
+            <a href = "dongu" style= "text-decoration: none;color :black"> {{devices[i].name}}</a>
+        </label>
+        <br>
+        <table style= "border:none;width:100%">
+            <tr>
+                <th>
+                    <label style= "margin-left:25px">
+                        Ngày tạo: {{devices[i].date.day|string + "-" + devices[i].date.month|string + "-" + devices[i].date.year|string}}
+                    </label>
+                </th>
+                <th>
+                    Vị trí: {{devices[i].position}}
+                </th>
+                <th>
+                    Đã ủ được: {{x[i].days}} ngày
+                </th>
+                <th style="text-align:right">
+                    <button type="button" onclick="popup('{{devices[i].uuid}}')" style= "background-color: red;color: white;border: none;">x</button><br>
+                </th>
+            </tr>
+        </table>
+        <div id="{{devices[i].uuid}}prompt" style="display: none;height:auto;text-align:right;">
+            <label> Nhập mật khẩu </label><br>
+            <input type="password" id = "{{devices[i].uuid}}pass">
+            <button onclick="exe('{{devices[i].uuid}}')" id = "{{devices[i].uuid}}but"> Xong </button>
+        </div>
+        <div id="temp{{devices[i].uuid|string}}" class = "square" style="background-color: red;color:white;margin-left: auto;margin-right: auto;font-size:40px;text-align:center;vertical-align:middle;line-height: 140px;">  </div>
+        <div id="humidity{{devices[i].uuid|string}}" class = "square" style="background-color: blue;color:white;margin-left: auto;margin-right: auto;font-size:40px;text-align:center;vertical-align:middle;line-height: 140px;">  </div>
+    </div><br>
+    <script>
+        $("#{{devices[i].uuid}}pass").keyup(function(event) {
+            if (event.keyCode === 13) {
+                $("#{{devices[i].uuid}}but").click();
+            }
+        });
+    </script>
+    {% endfor %}
+    <script>
+        function encode_utf8(s) {
+            return unescape(encodeURIComponent(s));
+        };
+        function drop(uuid) {
+            let p = prompt('Hãy nhập mật khẩu để xác nhận');
+            var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+                xmlhttp.open("POST", "/list");
+                xmlhttp.setRequestHeader("Content-Type", "application/json");
+                xmlhttp.send(JSON.stringify({uuid:uuid,p:p}));
+        };
+        function popup(uuid) {
+            if (document.getElementById(uuid+"prompt").style.display == "none") {
+                document.getElementById(uuid+"prompt").style.display = "block";
+            }
+            else document.getElementById(uuid+"prompt").style.display = "none";
+        };
+        function exe(uuid) {
+            document.getElementById(uuid+"prompt").style.display = "none";
+            var p = document.getElementById(uuid+"pass").value;
+            var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+            xmlhttp.open("POST", "/list");
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            xmlhttp.send(JSON.stringify({'uuid':uuid,p:p}));
+        };
+        $(document).ready(function(){
+            var socketio = io.connect('http://'+document.domain+':'+location.port+'/sensor');
+            var socket = io.connect('http://' + document.domain + ':' + location.port + '/user');
+            socket.emit('user','{{content.username}}');
+            socketio.on('temphum',function(msg){
+                console.log('#'+String(msg.uuid)+'temp');
+                $('#'+'temp'+String(msg.uuid)).html(msg.temp);
+                $('#'+'humidity'+String(msg.uuid)).html(msg.humidity);
+            });
+            socketio.on('error',function(error){
+                if(error.success==' ') {
+                    alert(error.error);
+                }
+                if(error.error==' ') {
+                    alert(error.success);
+                    location.reload();
+                }
+            });
+        });
+    </script>
+{% endblock %}

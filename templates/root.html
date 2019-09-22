@@ -1,0 +1,122 @@
+<style>
+    #username {
+        margin-left: auto;
+        margin-right: auto;
+        width : 60%;
+    }
+    #address {
+        margin-left: auto;
+        margin-right: auto;
+        width : 60%;
+    }
+    #name {
+        margin-left: auto;
+        margin-right: auto;
+        width : 60%;
+    }
+    #password {
+        margin-left: auto;
+        margin-right: auto;
+        width : 60%;
+    }
+    #email {
+        margin-left: auto;
+        margin-right: auto;
+        width : 60%;
+    }
+    #submit {
+        margin-left: 20%;
+    }
+    .but {
+        width:100px;
+        height: 50px;
+    }
+</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<div class="content-section">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" style="width:60%; margin-left: 20%;font-size: 19px">
+                {{message}}
+            </div>
+            {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4" style="margin-left: 20%;width:60%;font-size:180%">Create User</legend>
+            <div class="form-group">
+                <label class="form-control-label" for="username" style="margin-left: 20%;font-size:120%" >Username</label>
+                {% if form.username.errors %}
+                    {{ form.username(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.username.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.username(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-control-label" for="username" style="margin-left: 20%;font-size:120%" >Name</label>
+                {% if form.name.errors %}
+                    {{ form.name(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.name(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-control-label" for="password" style="margin-left: 20%;font-size:120%" >Password</label>
+                {% if form.password.errors %}
+                    {{ form.password(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.password.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.password(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-control-label" for="email" style="margin-left: 20%;font-size:120%" >Email</label>
+                {% if form.email.errors %}
+                    {{ form.email(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.email.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.email(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-control-label" for="username" style="margin-left: 20%;font-size:120%" >Address</label>
+                {% if form.address.errors %}
+                    {{ form.address(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.address.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.address(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+        </fieldset>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info but") }}
+        </div>
+    </form>
+</div>

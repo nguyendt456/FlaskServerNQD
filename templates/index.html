@@ -1,0 +1,7 @@
+{% extends "layout.html" %}
+{% block content %}
+    {% if current_user.is_authenticated %}
+        <div style= "font-size: 35px;margin-left: auto;margin-right: auto;text-align:center;"> Xin chào {{content.name}} ! </div>
+        <div style= "font-size: 35px;margin-left: auto;margin-right: auto;text-align:center;"> Địa chỉ: {{content.address}} </div>
+    {% endif %}
+{% endblock content %}

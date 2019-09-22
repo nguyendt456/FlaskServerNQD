@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    #startday {
+        margin-left: auto;
+        margin-right: auto;
+        width : 60%;
+    }
+    #uuid {
+        margin-left: auto;
+        margin-right: auto;
+        width : 60%;
+    }
+    #name {
+        margin-left: auto;
+        margin-right: auto;
+        width : 60%;
+    }
+    #submit {
+        margin-left: 20%;
+    }
+    #position {
+        margin-left: auto;
+        margin-right: auto;
+        width : 60%;
+    }
+    .rememberme {
+        margin-left: 20%;
+        font-size:120%;
+    }
+    .but {
+        width:100px;
+        height: 50px;
+    }
+</style>
+    <div class="content-section">
+        <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" style="width:60%; margin-left: 20%;font-size:120%">
+                {{message}}
+            </div>
+            {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4" style="margin-left: 20%;width:60%;font-size:180%">Tạo đống ủ mới</legend>
+            <div class="form-group">
+                <label class="form-control-label" for="uuid" style="margin-left: 20%;font-size:120%" >Mã UUID</label>
+                {% if form.uuid.errors %}
+                    {{ form.uuid(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback" style= "margin-left: 20%;">
+                        {% for error in form.uuid.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.uuid(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-control-label" for="name" style="margin-left: 20%;font-size:120%" >Tên đống ủ</label>
+                {% if form.name.errors %}
+                    {{ form.name(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback" style= "margin-left: 20%;">
+                        {% for error in form.name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.name(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-control-label" for="startday" style="margin-left: 20%;font-size:120%" >Ngày bắt đầu ủ (Ví dụ: ngày/tháng/năm, 20/9/2019)</label>
+                {% if form.startday.errors %}
+                    {{ form.startday(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback" style= "margin-left: 20%;">
+                        {% for error in form.startday.errors %}
+                            <span>{{ error }}</span><br>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.startday(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-control-label" for="position" style="margin-left: 20%;font-size:120%" >Vị trí của đống ủ (Ví dụ: Nhà ủ 1)</label>
+                {% if form.position.errors %}
+                    {{ form.position(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback" style= "margin-left: 20%;">
+                        {% for error in form.position.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.position(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+        </fielset>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info but") }}
+        </div>
+{% endblock %}
