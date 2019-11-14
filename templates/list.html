@@ -18,53 +18,110 @@
         .btn{
             font-size: 23px;
         }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            text-align: left;
+            display: none;
+            position: absolute;
+            background-color: rgb(103, 175, 131);
+            color:white;
+            min-width: 150px;
+            max-width: 225px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            padding: 12px 16px;
+            z-index: 1;
+        }
+        .dropdown-content:hover {
+            display: block;
+        }
+        .dropdown:hover .dropdown-content,
+        .dropdown:hover + .dropdown-content {
+            display: block;
+        }
     </style>
+    <script src="https://cdn.plot.ly/plotly-basic-latest.min.js"></script>
     <div style= "margin-left:auto;margin-right: auto;width:100%;text-align:center;"><a href="createnew" class="btn btn-outline-primary but"> Tạo đống ủ mới </a></div>
     <br>
     {% for i in range(0,devices.count()) %}
-    <div class = "rec" id="{{devices[i].uuid}}">
-        <label style= "font-size: 25px;margin-left:25px">
-            <a href = "dongu" style= "text-decoration: none;color :black"> {{devices[i].name}}</a>
-        </label>
-        <br>
-        <table style= "border:none;width:100%">
-            <tr>
-                <th>
-                    <label style= "margin-left:25px">
-                        Ngày tạo: {{devices[i].date.day|string + "-" + devices[i].date.month|string + "-" + devices[i].date.year|string}}
-                    </label>
-                </th>
-                <th>
-                    Vị trí: {{devices[i].position}}
-                </th>
-                <th>
-                    Đã ủ được: {{x[i].days}} ngày
-                </th>
-                <th style="text-align:right">
-                    <button type="button" onclick="popup('{{devices[i].uuid}}')" style= "background-color: red;color: white;border: none;">x</button><br>
-                </th>
-            </tr>
-        </table>
-        <div id="{{devices[i].uuid}}prompt" style="display: none;height:auto;text-align:right;">
-            <label> Nhập mật khẩu </label><br>
-            <input type="password" id = "{{devices[i].uuid}}pass">
-            <button onclick="exe('{{devices[i].uuid}}')" id = "{{devices[i].uuid}}but"> Xong </button>
-        </div>
-        <div id="temp{{devices[i].uuid|string}}" class = "square" style="background-color: red;color:white;margin-left: auto;margin-right: auto;font-size:40px;text-align:center;vertical-align:middle;line-height: 140px;">  </div>
-        <div id="humidity{{devices[i].uuid|string}}" class = "square" style="background-color: blue;color:white;margin-left: auto;margin-right: auto;font-size:40px;text-align:center;vertical-align:middle;line-height: 140px;">  </div>
-    </div><br>
-    <script>
-        $("#{{devices[i].uuid}}pass").keyup(function(event) {
-            if (event.keyCode === 13) {
-                $("#{{devices[i].uuid}}but").click();
-            }
-        });
-    </script>
+        <div class = "rec" id="{{devices[i].uuid}}">
+            <table style="border:none  ;width:100%">
+                <tr>
+                    <th>
+                        <label style= "font-size: 25px;margin-left:25px">
+                            <a href = "dongu" style= "text-decoration: none;color :black"> {{devices[i].name}}</a>
+                        </label>
+                    </th>
+                    <th style="width:50%" style="text-align: right;">
+                        <div class="dropdown">
+                            <button style="text-decoration:none;border:none;background-color: rgb(103, 175, 131);color:white;font-size: 17px;border-radius: 4px;">&#9663;</button>
+                        </div>
+                        <div class="dropdown-content">
+                            <p>Đổi tên đống ủ</p>
+                            <p>Kết thúc đống ủ</p>
+                            <button type="button" onclick="popup('{{devices[i].uuid}}')" style= "background-color: red;color: white;border: none;">Xóa</button><br>
+                            <div id="{{devices[i].uuid}}prompt" style="display: none;height:auto;text-align:left;">
+                                <p>Nhập mật khẩu xác nhận</p>
+                                <input style="width:50%" type="password" id = "{{devices[i].uuid}}pass">
+                                <button onclick="exe('{{devices[i].uuid}}')" id = "{{devices[i].uuid}}but"> Xong </button>
+                            </div>
+                        </div>
+                        
+                    </th>
+                </tr>
+            </table>
+            <br>
+            <table style= "border:none;width:100%">
+                <tr>
+                    <th>
+                        <label style= "margin-left:25px">
+                            Ngày tạo: {{devices[i].date.day|string + "-" + devices[i].date.month|string + "-" + devices[i].date.year|string}}
+                        </label>
+                    </th>
+                    <th>
+                        Vị trí: {{devices[i].position}}
+                    </th>
+                    <th>
+                        Đã ủ được: {{x[i].days}} ngày
+                    </th>
+                </tr>
+            </table>
+
+            <div id="trace{{devices[i].uuid|string}}" style="margin-left: auto;margin-right: auto;text-align:center;vertical-align:middle;width:100%;">  </div>
+        </div><br>
+        <script>
+            $("#{{devices[i].uuid}}pass").keyup(function(event) {
+                if (event.keyCode === 13) {
+                    $("#{{devices[i].uuid}}but").click();
+                }
+            });
+            var temptrace = {{ graphs[i].temptrace | safe }};
+            var humiditytrace = {{ graphs[i].humtrace | safe }};
+            var data = [temptrace,humiditytrace];
+            console.log(data);
+            var layout = {
+                title: ' ',
+                yaxis: {range : [{{devices[i].minmax.tempmin-0.5}},{{devices[i].minmax.tempmax+0.5}}],
+                        title: 'Nhiệt độ',
+                        tickfont: {color: 'rgb(255,50,50)'},
+                        titlefont: {color: 'rgb(255,50,50)'}    
+                    },
+                yaxis2: {
+                    range : [{{devices[i].minmax.hummin-1}},{{devices[i].minmax.hummax+1}}],
+                    title: 'Độ ẩm',
+                    titlefont: {color: 'rgb(50, 50, 255)'},
+                    tickfont: {color: 'rgb(50, 50, 255)'},
+                    overlaying: 'y',
+                    side: 'right'
+                }
+            };
+            Plotly.newPlot('trace{{devices[i].uuid|string}}', data,layout);
+        </script>
     {% endfor %}
     <script>
-        function encode_utf8(s) {
-            return unescape(encodeURIComponent(s));
-        };
         function drop(uuid) {
             let p = prompt('Hãy nhập mật khẩu để xác nhận');
             var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 

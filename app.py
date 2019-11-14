@@ -11,6 +11,7 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationE
 from wtforms_components import DateTimeField, DateRange
 from wtforms import Form
 
+from sqlalchemy.orm.attributes import flag_modified
 import plotly
 import chart_studio as py
 import plotly.graph_objs as go
@@ -19,7 +20,7 @@ import datetime
 
 app = Flask(__name__,static_url_path="/static")
 app.config['SECRET_KEY'] = "chuabietlagi"
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:nguyen@127.0.0.1/nguyen"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:nguyen@db/nguyen"
 app.config['SQLALCHEMY_POOL_SIZE'] = 100
 app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
 app.config['DEBUG'] = False
@@ -56,6 +57,8 @@ class device(db.Model,UserMixin):
     status = db.Column('status',db.String(16),nullable = False)
     date = db.Column('dateactive',db.Date())
     position = db.Column('position',db.String(),unique = True)
+    data = db.Column('data',db.JSON(),unique = False,nullable = False)
+    minmax = db.Column('minmax',db.JSON(),unique = False, nullable = False)
 
 class createuser(FlaskForm):
     username = StringField('Username',validators=[DataRequired()])
@@ -169,8 +172,27 @@ def listdongu():
     devices = device.query.filter_by(id = current_user.id,status = "online")
     content = []
     x = []
+    graphstore = []
     for i in range(0,devices.count()):
         x.append(datetime.date.today() - devices[i].date)
+        trace1 = go.Scatter(
+            x = devices[i].data['x'],
+            y = devices[i].data['temp'],
+            mode = 'lines',
+            name = 'Nhiet do',
+            line = dict(color = 'rgb(255,50,50)')
+        )
+        trace2 = go.Scatter(
+            x = devices[i].data['x'],
+            y = devices[i].data['humidity'],
+            mode = 'lines',
+            name = 'Do am',
+            yaxis = 'y2',
+            line = dict(color = 'rgb(50,50,255)')
+        )       
+        temptrace = json.dumps(trace1,cls = plotly.utils.PlotlyJSONEncoder)
+        humtrace = json.dumps(trace2,cls = plotly.utils.PlotlyJSONEncoder)
+        graphstore.append({'temptrace':temptrace,'humtrace':humtrace})
     if request.is_json:
         donguinfo = request.get_json()
         trackuser = login_user_data.query.filter_by(id = current_user.id).first()
@@ -179,11 +201,19 @@ def listdongu():
             dongune.id = 0
             name = dongune.name
             dongune.name = 'unknown'
-            socketio.emit('error',{'error': ' ','success':u'Xóa thành công %s!'%(name)},room = userlist[current_user.id],namespace = '/sensor')
+            socketio.emit(
+                'error',
+                {'error': ' ','success':u'Xóa thành công %s!'%(name)},
+                room = userlist[current_user.id],
+                namespace = '/sensor'
+            )
             db.session.commit()
         else:
-            socketio.emit('error',{'error': u'Nhập sai mật khẩu !','success': ' '},room = userlist[current_user.id],namespace = '/sensor')
-    return render_template("list.html",content = content,devices = devices,x=x)
+            socketio.emit('error',
+            {'error': u'Nhập sai mật khẩu !','success': ' '},
+            room = userlist[current_user.id],
+            namespace = '/sensor')
+    return render_template("list.html",content = content,devices = devices,x=x,graphs = graphstore)
 
 @app.route("/createnew",methods = ['GET','POST'])
 def createsomethingnew():
@@ -199,7 +229,6 @@ def createsomethingnew():
                 searchforuuid.name = form.name.data
                 searchforuuid.date = form.startday.data
                 searchforuuid.position = form.position.data
-                print(searchforuuid.date)
                 db.session.commit()
                 flash(u'Tạo thành công đống ủ mới !','success')
             else:
@@ -208,11 +237,31 @@ def createsomethingnew():
             flash(u'Nhập sai mã đống ủ !','danger')
     return render_template("createob.html",content=content,form = form)
 
-@app.route("/giatricambien",methods = ['POST'])
+@app.route("/giatricambien",methods = ['GET','POST'])
 def sensordata():
     if request.is_json:
         sensor = request.get_json()
-        databasedt = device.query.filter_by(uuid = sensor['uuid']).first()
+        databasedt = db.session.query(device).filter_by(uuid = sensor['uuid']).first()
+        if databasedt.minmax["tempmin"] > sensor['temp']:
+            databasedt.minmax["tempmin"] = sensor['temp']
+        if databasedt.minmax["tempmax"] < sensor['temp']:
+            databasedt.minmax["tempmax"] = sensor['temp']
+        if databasedt.minmax["hummin"] > sensor['humidity']:
+            databasedt.minmax["hummin"] = sensor['humidity']
+        if databasedt.minmax["hummax"] < sensor['humidity']:
+            databasedt.minmax["hummax"] = sensor['humidity']
+        timenow = str(datetime.datetime.now().time().hour) + ':' + str(datetime.datetime.now().time().minute) +'(' + str((datetime.date.today()-databasedt.date).days) +')'
+        if len(databasedt.data["x"]) != 0:
+            timestr = databasedt.data["x"][len(databasedt.data["x"])-1]
+            if int(timestr[timestr.find('(')+1:timestr.find(')')]) < int((datetime.date.today()-databasedt.date).days):
+                databasedt.data["timestep"].append(timenow)
+        print(timenow)
+        databasedt.data["x"].append(timenow)
+        databasedt.data["temp"].append(sensor['temp'])
+        databasedt.data["humidity"].append(sensor['humidity'])
+        flag_modified(databasedt,"data")
+        flag_modified(databasedt,"minmax")
+        db.session.commit()
         if userlist[databasedt.id] != '':
             socketio.emit('temphum',sensor,room = userlist[databasedt.id],namespace='/sensor')
             return Response(status=200, response="OK")
